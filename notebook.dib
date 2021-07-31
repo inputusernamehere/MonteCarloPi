@@ -40,7 +40,7 @@ let outsidePoints = normalizedPoints |> List.filter (not << inside radius)
 
 #!fsharp
 
-// area (inside circle) / area(outside circle) = 1/4 pi
+// (area inside circle) / (area outside circle) = 1 / 4 pi
 let ratio = (float insidePoints.Length) / (float points.Length)
 
 // multiply both sides by 4 to get pi
