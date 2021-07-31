@@ -1,0 +1,49 @@
+#!fsharp
+
+#r "nuget: Plotly.NET, 2.0.0-preview.6"
+#r "nuget: Plotly.NET.Interactive, 2.0.0-preview.6"
+
+open System
+open Plotly.NET
+
+let rng = System.Random()
+
+#!fsharp
+
+let radius = 1.0
+
+// length of the vector from (0, 0) to (x, y)
+// determines whether or not the point is inside the circle
+let hypothenuse (x, y) = Math.Sqrt((x * x) + (y * y))
+let inside radius point = hypothenuse point <= radius
+
+// transform the coordinate space of a point from (0 .. 1) to (-1 .. 1)
+// this is not necessary but gives us a nicer chart
+let normalize (x, y) = (x * 2.0 - 1.0), (y * 2.0 - 1.0)
+
+// generate random points (more points, more accuracy)
+// and transform them to the coordinate space we want
+let points = [ for _ in 1 .. 5_000 do yield (rng.NextDouble(), rng.NextDouble()) ]
+let normalizedPoints = points |> List.map normalize
+
+normalizedPoints
+
+#!fsharp
+
+// split the points into two groups, inside and outside of the circle
+let insidePoints = normalizedPoints |> List.filter (inside radius)
+let outsidePoints = normalizedPoints |> List.filter (not << inside radius)
+
+// combine two scatter plots to draw the circles in different colors
+[ Chart.Scatter (insidePoints, StyleParam.Mode.Markers); Chart.Scatter (outsidePoints, StyleParam.Mode.Markers) ]
+|> Chart.Combine
+
+#!fsharp
+
+// area (inside circle) / area(outside circle) = 1/4 pi
+let ratio = (float insidePoints.Length) / (float points.Length)
+
+// multiply both sides by 4 to get pi
+let pi = ratio * 4.0
+
+pi
